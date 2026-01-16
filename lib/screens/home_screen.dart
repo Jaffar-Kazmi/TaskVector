@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskvector/widgets/categories_list.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -55,26 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(12, 8, 0, 8),
-                child: Container(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text('Category ${index + 1}'),
-                          selected: index == 0,
-                          onSelected: (selected) {},
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          selectedColor: Theme.of(context).colorScheme.secondary,
-                          side: BorderSide.none,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                child: const CategoriesList(),
               )
             ],
           ),

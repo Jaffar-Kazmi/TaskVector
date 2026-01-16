@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/task_category.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 
-void main() => runApp(TaskVectorApp());
+void main() async {
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(TaskCategoryAdapter());
+  await Hive.openBox<TaskCategory>('categories');
+
+  runApp(TaskVectorApp());
+}
 
 class TaskVectorApp extends StatefulWidget{
   const TaskVectorApp({super.key});
