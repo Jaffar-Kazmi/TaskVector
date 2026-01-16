@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskvector/widgets/categories_list.dart';
-
+import 'package:taskvector/widgets/task_filters.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -57,7 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: EdgeInsets.fromLTRB(12, 8, 0, 8),
                 child: const CategoriesList(),
-              )
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(12, 20, 0, 8),
+                child: const TaskFilters(),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+              ),
             ],
           ),
         ),
