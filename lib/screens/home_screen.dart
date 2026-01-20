@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taskvector/widgets/categories_list.dart';
 import 'package:taskvector/widgets/task_filters.dart';
+import 'package:taskvector/widgets/tasks_list.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -62,12 +63,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.fromLTRB(12, 20, 0, 8),
                 child: const TaskFilters(),
               ),
-              Container(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsGeometry.fromLTRB(12, 8, 12, 8),
+                  child: const TasksList(),
+                )
               ),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {},
+        label: Text('Add Task', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,)),
+        icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary,),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        elevation: 2,
       ),
     );
   }

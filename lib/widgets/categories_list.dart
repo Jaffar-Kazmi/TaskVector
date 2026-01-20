@@ -64,6 +64,8 @@ class _CategoriesListState extends State<CategoriesList> {
                     ),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     selectedColor: Theme.of(context).colorScheme.secondary,
+                    elevation: 2,
+                    shadowColor: Theme.of(context).colorScheme.primary,
                     side: BorderSide.none,
                   ),
                 );
