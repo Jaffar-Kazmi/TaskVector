@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:taskvector/models/task.dart';
 import 'models/task_category.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
-
+  
+  Hive.registerAdapter(TaskPriorityAdapter());
+  Hive.registerAdapter(TaskStatusAdapter());
+  Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(TaskCategoryAdapter());
+
+  await Hive.openBox<Task>('tasks');
   await Hive.openBox<TaskCategory>('categories');
 
   runApp(TaskVectorApp());

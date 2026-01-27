@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskvector/screens/add_task_screen.dart';
 import 'package:taskvector/widgets/categories_list.dart';
 import 'package:taskvector/widgets/task_filters.dart';
 import 'package:taskvector/widgets/tasks_list.dart';
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
           child: IconButton(
-              icon: Icon(Icons.menu),
+              icon: Icon(Icons.account_circle_rounded),
               onPressed: () {},
           ),
         ),
@@ -74,7 +75,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          final added = Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTaskScreen()));
+
+          if (added == true) {
+            setState(() {
+
+            });
+          }
+        },
         label: Text('Add Task', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,)),
         icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary,),
         backgroundColor: Theme.of(context).colorScheme.primary,

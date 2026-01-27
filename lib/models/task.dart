@@ -1,13 +1,43 @@
-enum TaskPriority { low, medium, high }
-enum TaskStatus { pending, in_progress, done }
+import 'package:hive/hive.dart';
 
-class Task {
+
+part 'task.g.dart';
+
+@HiveType(typeId: 0)
+enum TaskPriority {
+  @HiveField(0)
+  low, 
+  @HiveField(1)
+  medium,
+  @HiveField(2)
+  high 
+}
+
+@HiveType(typeId: 1)
+enum TaskStatus { 
+  @HiveField(0)
+  pending, 
+  @HiveField(1)
+  ongoing,
+  @HiveField(2)
+  done
+}
+
+@HiveType(typeId: 2)
+class Task extends HiveObject {
+  @HiveField(0)
   String id;
+  @HiveField(1)
   String title;
+  @HiveField(2)
   String? description;
+  @HiveField(3)
   String? category;
+  @HiveField(4)
   DateTime? dueDate;
+  @HiveField(5)
   TaskPriority priority;
+  @HiveField(6)
   TaskStatus status;
 
   Task({
