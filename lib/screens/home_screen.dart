@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
           child: IconButton(
-              icon: Icon(Icons.account_circle_rounded),
+              icon: Icon(Icons.account_circle_rounded, size: 25,),
               onPressed: () {},
           ),
         ),
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const CategoriesList(),
               ),
               Container(
-                padding: EdgeInsets.fromLTRB(12, 20, 0, 8),
+                padding: EdgeInsets.fromLTRB(12, 20, 8, 8),
                 child: const TaskFilters(),
               ),
               Expanded(

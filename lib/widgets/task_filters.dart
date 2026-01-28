@@ -16,61 +16,68 @@ class _TaskFiltersState extends State<TaskFilters> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildFilterButton(
-              context: context,
-              selectedValue: selectedTimeFilter,
-              onSelected: (value) {
-                setState(() {
-                  selectedTimeFilter = value;
-                });
-              },
-              items: [
-                "All Tasks",
-                "Due Today",
-                "Due Tomorrow",
-                "By Week",
-                "By Month",
-              ],
-            ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildFilterButton(
+                context: context,
+                selectedValue: selectedTimeFilter,
+                onSelected: (value) {
+                  setState(() {
+                    selectedTimeFilter = value;
+                  });
+                  },
+                items: [
+                  "All Tasks",
+                  "Due Today",
+                  "Due Tomorrow",
+                  "By Week",
+                  "By Month",
+                ],
+              ),
 
-            // Status Filter
-            _buildFilterButton(
-              context: context,
-              selectedValue: selectedStatusFilter,
-              onSelected: (value) {
-                setState(() {
-                  selectedStatusFilter = value;
-                });
-              },
-              items: [
-                "All Status",
-                "Completed",
-                "In Progress",
-                "Not Started",
-              ],
-            ),
+              SizedBox(width: 8,),
 
-            // Priority Filter
-            _buildFilterButton(
-              context: context,
-              selectedValue: selectedPriorityFilter,
-              onSelected: (value) {
-                setState(() {
-                  selectedPriorityFilter = value;
-                });
-              },
-              items: [
-                "All Priority",
-                "High",
-                "Medium",
-                "Low",
-              ],
-            ),
-          ],
+              // Status Filter
+              _buildFilterButton(
+                context: context,
+                selectedValue: selectedStatusFilter,
+                onSelected: (value) {
+                  setState(() {
+                    selectedStatusFilter = value;
+                  });
+                  },
+                items: [
+                  "All Status",
+                  "Completed",
+                  "In Progress",
+                  "Not Started",
+                ],
+              ),
+
+              SizedBox(width: 8,),
+
+              // Priority Filter
+              _buildFilterButton(
+                context: context,
+                selectedValue: selectedPriorityFilter,
+                onSelected: (value) {
+                  setState(() {
+                    selectedPriorityFilter = value;
+                  });
+                  },
+                items: [
+                  "All Priority",
+                  "High",
+                  "Medium",
+                  "Low",
+                ],
+              ),
+
+              SizedBox(width: 8,),
+            ],
+          ),
         ),
       ],
     );

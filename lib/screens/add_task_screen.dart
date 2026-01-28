@@ -168,7 +168,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
                 const SizedBox(height: 12,),
 
-                ElevatedButton(onPressed: _saveTask, child: Text('Save Task')),
+                ElevatedButton(onPressed: _saveTask, child: Text('Save Task'),),
               ],
             ),
           ),

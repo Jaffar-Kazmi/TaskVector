@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const lightPrimary = Color(0xFFa7a9b2);
+  static const lightPrimary = Color(0xFF0EA5E9);
   static const lightPrimaryVariant = Color(0xFF5A52D5);
   static const lightSecondary = Color(0xFF00B8D4); // Cyan Accent
   static const lightSecondaryVariant = Color(0xFF008BA3);
@@ -68,7 +68,7 @@ class AppTheme {
       primaryContainer: AppColors.lightSurfaceVariant,
       secondary: AppColors.lightSecondary,
       surface: AppColors.lightSurface,
-      surfaceTint: AppColors.lightPrimary, // Adds slight tint to elevated surfaces
+      surfaceTint: AppColors.lightPrimary,
       error: AppColors.error,
       onPrimary: Colors.white,
       onSecondary: Colors.white,

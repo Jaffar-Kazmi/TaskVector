@@ -23,21 +23,24 @@ class _CategoriesListState extends State<CategoriesList> {
             final categories = box.values.toList();
             return ListView.builder(
               scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
               itemCount: categories.length + 1,
               itemBuilder: (context, index) {
                 if (index == categories.length) {
                   return Padding(
                     padding: EdgeInsets.only(right: 8),
                     child: ActionChip(
-                      label: Icon(Icons.add),
+                      label: Icon(Icons.add, color: Theme.of(context).colorScheme.primary,),
                       labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 18
                       ),
                       onPressed: () => _showAddCategoryDialog(context),
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   );
                 }
@@ -64,7 +67,7 @@ class _CategoriesListState extends State<CategoriesList> {
                     ),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     selectedColor: Theme.of(context).colorScheme.secondary,
-                    elevation: 2,
+                    elevation: 1,
                     shadowColor: Theme.of(context).colorScheme.primary,
                     side: BorderSide.none,
                   ),
