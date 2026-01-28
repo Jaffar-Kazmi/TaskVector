@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:taskvector/models/task_category.dart';
 
 
 part 'task.g.dart';
@@ -32,7 +33,7 @@ class Task extends HiveObject {
   @HiveField(2)
   String? description;
   @HiveField(3)
-  String? category;
+  TaskCategory? category;
   @HiveField(4)
   DateTime? dueDate;
   @HiveField(5)

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:taskvector/models/task.dart';
 import 'package:taskvector/models/task_category.dart';
-import 'package:taskvector/services/task_db.dart';
-import 'package:uuid/uuid.dart';
+import 'package:taskvector/services/category_db.dart';
+import '../services/task_db.dart';  // If needed for consistency
 
-import '../services/category_db.dart';
+class EditTaskScreen extends StatefulWidget {
+  final Task task;
 
-class AddTaskScreen  extends StatefulWidget {
-  const AddTaskScreen({super.key});
+  const EditTaskScreen({super.key, required this.task});
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
+  State<EditTaskScreen> createState() => _EditTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
+class _EditTaskScreenState extends State<EditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
 
   List<TaskCategory> _categories = [];
   TaskCategory? _category;
@@ -26,43 +26,70 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TaskStatus _status = TaskStatus.pending;
   DateTime? _dueDate;
 
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.task.title);
+    _descriptionController = TextEditingController(text: widget.task.description ?? '');
+
+    _priority = widget.task.priority;
+    _status = widget.task.status;
+    _dueDate = widget.task.dueDate;
+
+    _categories = CategoryDb.getAll();
+
+    // Match existing category
+    _category = _categories.firstWhere(
+          (cat) => cat.name.toLowerCase() == widget.task.category?.name.toLowerCase(),
+      orElse: () => _categories.first,
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickDate() async {
     final date = await showDatePicker(
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      initialDate: DateTime.now(),
+      initialDate: _dueDate ?? DateTime.now(),
     );
-
     if (date != null) {
-      setState(() {
-        _dueDate = date;
-      });
+      setState(() => _dueDate = date);
     }
   }
 
   Future<void> _saveTask() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final task = Task(
-      id: const Uuid().v4(),
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      dueDate: _dueDate,
-      priority: _priority,
-      status: _status,
-    );
+    widget.task.title = _titleController.text.trim();
+    widget.task.description = _descriptionController.text.trim().isEmpty
+        ? null
+        : _descriptionController.text.trim();
+    widget.task.category = _category;
+    widget.task.dueDate = _dueDate;
+    widget.task.priority = _priority;
+    widget.task.status = _status;
 
-    await TaskDb.addTask(task);
+    await widget.task.save();
 
-    Navigator.pop(context, true);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Task updated successfully!'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
 
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _categories = CategoryDb.getAll();
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -72,9 +99,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text('Add Task'),
-        ),
+        appBar: AppBar(title: const Text('Edit Task')),
         body: Padding(
           padding: EdgeInsets.all(20),
           child: Form(
@@ -131,8 +156,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
                 ListTile(
                   title: Text(_dueDate == null
-                     ? 'Due Date'
-                     : 'Due: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'),
+                      ? 'No due date'
+                      : 'Due: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'),
                   subtitle: const Text('Tap to change'),
                   leading: const Icon(Icons.calendar_today),
                   trailing: const Icon(Icons.arrow_forward_ios),
@@ -163,15 +188,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 ButtonTheme(
                   alignedDropdown: true,
                   child: DropdownButtonFormField<TaskStatus>(
-                      initialValue: _status,
-                      decoration: InputDecoration(
-                        labelText: 'Status',
-                        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
-                      items: TaskStatus.values.map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e.name.toUpperCase()))).toList(),
-                      onChanged: (v) => setState(() => _status = v!),
+                    initialValue: _status,
+                    decoration: InputDecoration(
+                      labelText: 'Status',
+                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                    items: TaskStatus.values.map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.name.toUpperCase()))).toList(),
+                    onChanged: (v) => setState(() => _status = v!),
                   ),
                 ),
 

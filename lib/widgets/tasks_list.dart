@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:taskvector/screens/edit_task_screen.dart';
 import '../models/task.dart';
 
 class TasksList extends StatelessWidget {
@@ -7,13 +8,65 @@ class TasksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Box<Task> tasksBox = Hive.box<Task>('tasks');
+    final Box<Task> tasks = Hive.box<Task>('tasks');
+
+    Future<void> _handleDelete({
+      required BuildContext context,
+      required Box<Task> tasks,
+      required Task task,
+    }) async {
+      final String? taskKey = task.key;
+      final Task deletedTask = task;
+
+      final confirmDelete = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Task'),
+          content: const Text('Are you sure you want to delete this task?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmDelete != true || taskKey == null) return;
+
+      await tasks.delete(taskKey);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(children: [Text('Task deleted')]),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'UNDO',
+              onPressed: () async {
+                await tasks.put(taskKey, deletedTask);
+              },
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            persist: false,
+          ),
+        );
+      }
+    }
 
     return ValueListenableBuilder<Box<Task>>(
-      valueListenable: tasksBox.listenable(),
+      valueListenable: tasks.listenable(),
       builder: (context, box, _) {
         if (box.isEmpty) {
-          return const Center(child: Text('No tasks yet'));
+          return const Center(child: Text('No tasks yet', style: TextStyle(fontSize: 16),));
         }
 
         return ListView.builder(
@@ -52,14 +105,27 @@ class TasksList extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                'Due: ${task.dueDate?.day}-${task.dueDate?.month}-${task.dueDate?.year}',
+                task.dueDate != null
+                ? 'Due: ${task.dueDate?.day}-${task.dueDate?.month}-${task.dueDate?.year}'
+                    : ' ',
               ),
-              trailing: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.remove_red_eye_outlined),
+              trailing: Chip(
+                label: Text(
+                  task.priority.name.toUpperCase(),
+                  style: const TextStyle(color: Colors.black),
+                ),
+                backgroundColor:
+                task.priority == TaskPriority.high
+                    ? Colors.red[200]
+                    : Colors.blue[200],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+                shadowColor: Colors.grey,
+                side: BorderSide.none,
               ),
-              childrenPadding:
-              const EdgeInsets.fromLTRB(26, 12, 20, 12),
+              childrenPadding: const EdgeInsets.fromLTRB(26, 12, 20, 12),
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
@@ -68,32 +134,29 @@ class TasksList extends StatelessWidget {
                 Row(
                   children: [
                     Chip(
-                      label: Text(
-                        task.priority.name.toUpperCase(),
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                      backgroundColor:
-                      task.priority == TaskPriority.high
-                          ? Colors.red[200]
-                          : Colors.blue[200],
+                      label: Text(task.category?.name ?? 'No Category', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,),),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 2,
-                      shadowColor: Colors.grey,
                       side: BorderSide.none,
                     ),
                     const Spacer(),
                     TextButton.icon(
                       onPressed: () {
-                        // open edit screen and after save, update box
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EditTaskScreen(task: task)),
+                        );
+                          
                       },
                       icon: const Icon(Icons.edit),
                       label: const Text('Edit'),
                     ),
                     IconButton(
                       onPressed: () {
-                        box.deleteAt(index);
+                        _handleDelete(context: context, tasks: tasks, task: task);
                       },
                       icon: Icon(
                         Icons.delete,
