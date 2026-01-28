@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:taskvector/models/task.dart';
+import 'package:taskvector/provider/theme_provider.dart';
 import 'models/task_category.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   
   Hive.registerAdapter(TaskPriorityAdapter());
@@ -15,36 +18,32 @@ void main() async {
 
   await Hive.openBox<Task>('tasks');
   await Hive.openBox<TaskCategory>('categories');
+  await Hive.openBox('settings');
 
-  runApp(TaskVectorApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider()..loadTheme(),
+      child: TaskVectorApp()
+    )
+  );
 }
 
-class TaskVectorApp extends StatefulWidget{
+class TaskVectorApp extends StatelessWidget{
   const TaskVectorApp({super.key});
 
   @override
-  State<TaskVectorApp> createState() => _TaskVectorAppState();
-}
-
-class _TaskVectorAppState extends State<TaskVectorApp> {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  void _toggleTheme(){
-    setState(() {
-      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final VoidCallback onToggleTheme = _toggleTheme;
-    return MaterialApp(
-      title: 'TaskVector',
-      home: HomeScreen(onToggleTheme: onToggleTheme),
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: _themeMode,
-      debugShowCheckedModeBanner: false,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'TaskVector',
+          home: HomeScreen(),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          debugShowCheckedModeBanner: false,
+        );
+      }
     );
   }
 }

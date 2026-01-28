@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taskvector/provider/theme_provider.dart';
 import 'package:taskvector/screens/add_task_screen.dart';
 import 'package:taskvector/widgets/categories_list.dart';
 import 'package:taskvector/widgets/task_filters.dart';
 import 'package:taskvector/widgets/tasks_list.dart';
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback onToggleTheme;
+  const HomeScreen({super.key});
 
-  const HomeScreen({super.key, required this.onToggleTheme});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,11 +20,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSearching = false;
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text('TaskVector'),
         leading: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
           child: IconButton(
@@ -32,9 +33,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: isDark? Icon(Icons.light_mode_rounded) : Icon(Icons.dark_mode_rounded),
-            onPressed: widget.onToggleTheme,
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: themeProvider.themeMode == ThemeMode.dark ? Icon(Icons.light_mode_rounded) : Icon(Icons.dark_mode_rounded),
+                onPressed: () => themeProvider.changeTheme(
+                  themeProvider.themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+                ),
+              );
+            },
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
