@@ -18,20 +18,48 @@ class _HomeScreenState extends State<HomeScreen> {
   final String firstName = 'Jaffar';
   final String lastName = 'Raza';
 
+  bool _isSearching = false;
+  final TextEditingController searchController = TextEditingController();
+
+  void _handleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        searchController.clear();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isSearching = false;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TaskVector'),
-        leading: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
-          child: IconButton(
-              icon: Icon(Icons.account_circle_rounded, size: 25,),
-              onPressed: () {},
+        title: _isSearching ? TextField(
+          controller: searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search tasks',
+            prefixIcon: Icon(Icons.search),
+            hintStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            border: InputBorder.none,
           ),
-        ),
+          onChanged: (value) => setState(() {}),
+        ) : Text('TaskVector'),
+        // leading: Padding(
+        //   padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+        //   child: IconButton(
+        //       icon: Icon(Icons.account_circle_rounded, size: 25,),
+        //       onPressed: () {},
+        //   ),
+        // ),
         actions: [
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
@@ -46,8 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
             child: IconButton(
-                onPressed: () {},
-                icon: Icon(isSearching ? Icons.close : Icons.search)
+                onPressed: _handleSearch,
+                icon: Icon(_isSearching ? Icons.close : Icons.search)
             ),
           ),
         ],
@@ -74,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsGeometry.fromLTRB(12, 8, 12, 8),
-                  child: const TasksList(),
+                  child: TasksList(searchQuery: searchController.text,),
                 )
               ),
             ],

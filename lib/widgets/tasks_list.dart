@@ -4,13 +4,15 @@ import 'package:taskvector/screens/edit_task_screen.dart';
 import '../models/task.dart';
 
 class TasksList extends StatelessWidget {
-  const TasksList({super.key});
+  final String searchQuery;
+
+  const TasksList({super.key, this.searchQuery = ''});
 
   @override
   Widget build(BuildContext context) {
     final Box<Task> tasks = Hive.box<Task>('tasks');
 
-    Future<void> _handleDelete({
+    Future<void> handleDelete({
       required BuildContext context,
       required Box<Task> tasks,
       required Task task,
@@ -65,16 +67,18 @@ class TasksList extends StatelessWidget {
     return ValueListenableBuilder<Box<Task>>(
       valueListenable: tasks.listenable(),
       builder: (context, box, _) {
+        final allTasks = box.values.where((task) =>
+          task.title.toLowerCase().contains(searchQuery.toLowerCase()) || (task.description ?? '').toLowerCase().contains(searchQuery.toLowerCase())
+        ).toList();
+
         if (box.isEmpty) {
           return const Center(child: Text('No tasks yet', style: TextStyle(fontSize: 16),));
         }
 
         return ListView.builder(
-          itemCount: box.length,
+          itemCount: allTasks.length,
           itemBuilder: (context, index) {
-            final task = box.getAt(index);
-
-            if (task == null) return const SizedBox.shrink();
+            final task = allTasks[index];
 
             return ExpansionTile(
               leading: IconButton(
@@ -156,7 +160,7 @@ class TasksList extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () {
-                        _handleDelete(context: context, tasks: tasks, task: task);
+                        handleDelete(context: context, tasks: tasks, task: task);
                       },
                       icon: Icon(
                         Icons.delete,
