@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
 
 class TaskFilters extends StatefulWidget {
-  const TaskFilters({super.key});
+  final Function(String?) onTimeFilterChanged;
+  final Function(String?) onStatusFilterChanged;
+  final Function(String?) onPriorityFilterChanged;
+
+  final String? currentTimeFilter;
+  final String? currentStatusFilter;
+  final String? currentPriorityFilter;
+
+  const TaskFilters({
+    super.key,
+    required this.onTimeFilterChanged,
+    required this.onStatusFilterChanged,
+    required this.onPriorityFilterChanged,
+    this.currentTimeFilter,
+    this.currentStatusFilter,
+    this.currentPriorityFilter
+  });
 
   @override
   State<TaskFilters> createState() => _TaskFiltersState();
@@ -22,12 +38,8 @@ class _TaskFiltersState extends State<TaskFilters> {
             children: [
               _buildFilterButton(
                 context: context,
-                selectedValue: selectedTimeFilter,
-                onSelected: (value) {
-                  setState(() {
-                    selectedTimeFilter = value;
-                  });
-                  },
+                selectedValue: widget.currentTimeFilter ?? "All Tasks",
+                onSelected: widget.onTimeFilterChanged,
                 items: [
                   "All Tasks",
                   "Due Today",
@@ -42,12 +54,8 @@ class _TaskFiltersState extends State<TaskFilters> {
               // Status Filter
               _buildFilterButton(
                 context: context,
-                selectedValue: selectedStatusFilter,
-                onSelected: (value) {
-                  setState(() {
-                    selectedStatusFilter = value;
-                  });
-                  },
+                selectedValue: widget.currentStatusFilter ?? "All Status",
+                onSelected: widget.onStatusFilterChanged,
                 items: [
                   "All Status",
                   "Completed",
@@ -61,12 +69,8 @@ class _TaskFiltersState extends State<TaskFilters> {
               // Priority Filter
               _buildFilterButton(
                 context: context,
-                selectedValue: selectedPriorityFilter,
-                onSelected: (value) {
-                  setState(() {
-                    selectedPriorityFilter = value;
-                  });
-                  },
+                selectedValue: widget.currentPriorityFilter ?? "All Priority",
+                onSelected: widget.onPriorityFilterChanged,
                 items: [
                   "All Priority",
                   "High",
@@ -99,7 +103,6 @@ class _TaskFiltersState extends State<TaskFilters> {
       ))
           .toList(),
       borderRadius: BorderRadius.all(Radius.circular(12)),
-      color: Theme.of(context).colorScheme.primary,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(

@@ -6,12 +6,61 @@ import '../models/task.dart';
 class TasksList extends StatelessWidget {
   final String searchQuery;
   final String? categoryId;
+  final String? timeFilter;
+  final String? statusFilter;
+  final String? priorityFilter;
+
 
   const TasksList({
     super.key,
     this.searchQuery = '',
     this.categoryId,
+    this.timeFilter,
+    this.statusFilter,
+    this.priorityFilter,
   });
+
+  bool _matchesTimeFilter(Task task) {
+    if(timeFilter == "All Tasks" || timeFilter == null) return true;
+
+    final now = DateTime.now();
+    final dueDate = task.dueDate;
+    if (dueDate == null) return false;
+
+    switch (timeFilter) {
+      case "Due Today":
+        return dueDate.isToday(now);
+      case "Due Tomorrow":
+        return dueDate.isTomorrow(now);
+      case "By Week":
+        return dueDate.isSameWeek(now);
+      case "By Month":
+        return dueDate.isSameMonth(now);
+      default:
+        return true;
+    }
+  }
+
+  bool _matchesStatusFilter(Task task) {
+    if(statusFilter == "All Status" || statusFilter == null) return true;
+
+    switch (statusFilter) {
+      case "Completed":
+        return task.status == TaskStatus.done;
+      case "In Progress":
+        return task.status == TaskStatus.ongoing;
+      case "Not Started":
+        return task.status == TaskStatus.pending;
+      default:
+        return true;
+    }
+  }
+
+  bool _matchesPriorityFilter(Task task) {
+    if(priorityFilter == "All Priority" || priorityFilter == null) return true;
+
+    return task.priority.name.toUpperCase() == priorityFilter?.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,9 +126,17 @@ class TasksList extends StatelessWidget {
               searchQuery.toLowerCase()) ||
               (task.description ?? '').toLowerCase().contains(
                   searchQuery.toLowerCase());
+
           final matchesCategory = categoryId == null ||
               task.category?.id == categoryId;
-          return matchesCategory && matchesSearch;
+
+          final matchesTime = _matchesTimeFilter(task);
+
+          final matchesStatus = _matchesStatusFilter(task);
+
+          final matchesPriority = _matchesPriorityFilter(task);
+
+          return matchesCategory && matchesSearch && matchesTime && matchesStatus && matchesPriority;
         }).toList();
 
         if (box.isEmpty) {

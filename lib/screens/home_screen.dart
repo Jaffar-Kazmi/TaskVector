@@ -19,6 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final String lastName = 'Raza';
 
   String? _selectedCategoryId;
+  String? _timeFilter = "All Tasks";
+  String? _statusFilter = "All Status";
+  String? _priorityFilter = "All Priority";
 
   bool _isSearching = false;
   final TextEditingController searchController = TextEditingController();
@@ -111,7 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(12, 20, 8, 8),
-                child: const TaskFilters(),
+                child: TaskFilters(
+                  currentTimeFilter: _timeFilter,
+                  currentStatusFilter: _statusFilter,
+                  currentPriorityFilter: _priorityFilter,
+                  onTimeFilterChanged: (value) => setState(() { _timeFilter = value; }),
+                  onStatusFilterChanged: (value) => setState(() { _statusFilter = value; }),
+                  onPriorityFilterChanged: (value) => setState(() { _priorityFilter = value; }),
+                ),
               ),
               Expanded(
                 child: Padding(
@@ -119,6 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: TasksList(
                     searchQuery: searchController.text,
                     categoryId: _selectedCategoryId,
+                    timeFilter: _timeFilter,
+                    statusFilter: _statusFilter,
+                    priorityFilter: _priorityFilter,
                   ),
                 )
               ),

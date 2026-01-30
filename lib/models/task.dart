@@ -51,3 +51,13 @@ class Task extends HiveObject {
     required this.status,
   });
 }
+
+extension DateHelpers on DateTime {
+  bool isToday(DateTime now) => year == now.year && month == now.month && day == now.day;
+
+  bool isTomorrow(DateTime now) => year == now.year && month == now.month && day == now.day + 1;
+
+  bool isSameWeek(DateTime now) => difference(now).inDays.abs() <= 7;
+
+  bool isSameMonth(DateTime now) => year == now.year && month == now.month;
+}
