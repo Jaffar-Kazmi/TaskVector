@@ -5,8 +5,13 @@ import '../models/task.dart';
 
 class TasksList extends StatelessWidget {
   final String searchQuery;
+  final String? categoryId;
 
-  const TasksList({super.key, this.searchQuery = ''});
+  const TasksList({
+    super.key,
+    this.searchQuery = '',
+    this.categoryId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,18 +72,24 @@ class TasksList extends StatelessWidget {
     return ValueListenableBuilder<Box<Task>>(
       valueListenable: tasks.listenable(),
       builder: (context, box, _) {
-        final allTasks = box.values.where((task) =>
-          task.title.toLowerCase().contains(searchQuery.toLowerCase()) || (task.description ?? '').toLowerCase().contains(searchQuery.toLowerCase())
-        ).toList();
+        final filteredTasks = box.values.where((task) {
+          final matchesSearch = task.title.toLowerCase().contains(
+              searchQuery.toLowerCase()) ||
+              (task.description ?? '').toLowerCase().contains(
+                  searchQuery.toLowerCase());
+          final matchesCategory = categoryId == null ||
+              task.category?.id == categoryId;
+          return matchesCategory && matchesSearch;
+        }).toList();
 
         if (box.isEmpty) {
           return const Center(child: Text('No tasks yet', style: TextStyle(fontSize: 16),));
         }
 
         return ListView.builder(
-          itemCount: allTasks.length,
+          itemCount: filteredTasks.length,
           itemBuilder: (context, index) {
-            final task = allTasks[index];
+            final task = filteredTasks[index];
 
             return ExpansionTile(
               leading: IconButton(

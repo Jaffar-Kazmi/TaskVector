@@ -18,6 +18,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final String firstName = 'Jaffar';
   final String lastName = 'Raza';
 
+  String? _selectedCategoryId;
+
   bool _isSearching = false;
   final TextEditingController searchController = TextEditingController();
 
@@ -93,7 +95,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(12, 8, 0, 8),
-                child: const CategoriesList(),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CategoriesList(
+                        onSelectedCategory: (categoryId) {
+                          setState(() {
+                            _selectedCategoryId = categoryId;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(12, 20, 8, 8),
@@ -102,7 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsGeometry.fromLTRB(12, 8, 12, 8),
-                  child: TasksList(searchQuery: searchController.text,),
+                  child: TasksList(
+                    searchQuery: searchController.text,
+                    categoryId: _selectedCategoryId,
+                  ),
                 )
               ),
             ],
