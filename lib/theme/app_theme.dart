@@ -130,19 +130,15 @@ class AppTheme {
     iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
   );
 
-  // ---------------------------------------------------------------------------
-  // DARK THEME CONFIGURATION
-  // ---------------------------------------------------------------------------
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: 'Poppins',
 
-    // Color Scheme
     colorScheme: const ColorScheme.dark(
       primary: AppColors.darkPrimary,
       primaryContainer: AppColors.darkSurfaceVariant,
-      secondary: AppColors.darkSecondary,
+      secondary: AppColors.darkSecondaryVariant,
       surface: AppColors.darkSurface,
       error: AppColors.error,
       onPrimary: Colors.white,

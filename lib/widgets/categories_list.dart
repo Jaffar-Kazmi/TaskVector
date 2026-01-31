@@ -56,12 +56,12 @@ class _CategoriesListState extends State<CategoriesList> {
                           color: isDark ? Colors.white70 : Colors.black87,
                           fontSize: 16,
                         ),
+                        selectedColor: Theme.of(context).colorScheme.secondary,
                         elevation: selectedCategoryId == null ? 2 : 0,
                         side: BorderSide.none,
                       ),
                     ),
 
-                    // Regular categories
                     ...categories.map((category) => Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(

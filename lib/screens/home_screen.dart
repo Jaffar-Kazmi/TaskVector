@@ -192,21 +192,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
                   ),
-                  floatingActionButton: FloatingActionButton.extended(
-                    onPressed: () {
-                      final added = Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTaskScreen()));
-
-                      if (added == true) {
-                        setState(() {
-
-                        });
-                      }
-                    },
-                    label: Text('Add Task', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,)),
-                    icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary,),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    elevation: 2,
-                  ),
                 );
               }
           ),
@@ -219,6 +204,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          final added = Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTaskScreen()));
+
+          if (added == true) {
+            setState(() {
+
+            });
+          }
+        },
+        label: Text('Add Task', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,)),
+        icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary,),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        elevation: 2,
       ),
     );
   }

@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: widget.onClose,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(color: Colors.black26),
+            child: Container(color: Colors.transparent),
           ),
         ),
 

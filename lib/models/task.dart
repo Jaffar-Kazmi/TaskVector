@@ -50,6 +50,19 @@ class Task extends HiveObject {
     required this.priority,
     required this.status,
   });
+
+  Task copy() {
+    return Task(
+      id: '',
+      title: title,
+      description: description,
+      category: category,
+      dueDate: dueDate,
+      priority: priority,
+      status: status,
+    );
+  }
+
 }
 
 extension DateHelpers on DateTime {

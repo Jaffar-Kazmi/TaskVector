@@ -132,12 +132,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 ListTile(
                   title: Text(_dueDate == null
                      ? 'Due Date'
-                     : 'Due: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'),
-                  subtitle: const Text('Tap to change'),
-                  leading: const Icon(Icons.calendar_today),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  tileColor: Colors.grey[100],
+                     : 'Due: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                  ),
+                  subtitle: const Text('Tap to change', style: TextStyle(color: Colors.white70),),
+                  leading: const Icon(Icons.calendar_today, color: Colors.white70,),
+                  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white70,),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  tileColor: Theme.of(context).colorScheme.primary,
                   onTap: _pickDate,
                 ),
 

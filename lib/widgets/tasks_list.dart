@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:taskvector/screens/edit_task_screen.dart';
+import 'package:taskvector/widgets/task_tile.dart';
 import '../models/task.dart';
 
-class TasksList extends StatelessWidget {
+class TasksList extends StatefulWidget {
   final String searchQuery;
   final String? categoryId;
   final String? timeFilter;
@@ -20,14 +21,21 @@ class TasksList extends StatelessWidget {
     this.priorityFilter,
   });
 
+  @override
+  State<TasksList> createState() => _TasksListState();
+}
+
+class _TasksListState extends State<TasksList> {
+  int? _expandedIndex;
+
   bool _matchesTimeFilter(Task task) {
-    if(timeFilter == "All Tasks" || timeFilter == null) return true;
+    if(widget.timeFilter == "All Tasks" || widget.timeFilter == null) return true;
 
     final now = DateTime.now();
     final dueDate = task.dueDate;
     if (dueDate == null) return false;
 
-    switch (timeFilter) {
+    switch (widget.timeFilter) {
       case "Due Today":
         return dueDate.isToday(now);
       case "Due Tomorrow":
@@ -42,9 +50,9 @@ class TasksList extends StatelessWidget {
   }
 
   bool _matchesStatusFilter(Task task) {
-    if(statusFilter == "All Status" || statusFilter == null) return true;
+    if(widget.statusFilter == "All Status" || widget.statusFilter == null) return true;
 
-    switch (statusFilter) {
+    switch (widget.statusFilter) {
       case "Completed":
         return task.status == TaskStatus.done;
       case "In Progress":
@@ -57,9 +65,9 @@ class TasksList extends StatelessWidget {
   }
 
   bool _matchesPriorityFilter(Task task) {
-    if(priorityFilter == "All Priority" || priorityFilter == null) return true;
+    if(widget.priorityFilter == "All Priority" || widget.priorityFilter == null) return true;
 
-    return task.priority.name.toUpperCase() == priorityFilter?.toUpperCase();
+    return task.priority.name.toUpperCase() == widget.priorityFilter?.toUpperCase();
   }
 
   @override
@@ -123,12 +131,12 @@ class TasksList extends StatelessWidget {
       builder: (context, box, _) {
         final filteredTasks = box.values.where((task) {
           final matchesSearch = task.title.toLowerCase().contains(
-              searchQuery.toLowerCase()) ||
+              widget.searchQuery.toLowerCase()) ||
               (task.description ?? '').toLowerCase().contains(
-                  searchQuery.toLowerCase());
+                  widget.searchQuery.toLowerCase());
 
-          final matchesCategory = categoryId == null ||
-              task.category?.id == categoryId;
+          final matchesCategory = widget.categoryId == null ||
+              task.category?.id == widget.categoryId;
 
           final matchesTime = _matchesTimeFilter(task);
 
@@ -147,98 +155,16 @@ class TasksList extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           itemCount: filteredTasks.length,
           itemBuilder: (context, index) {
-            final task = filteredTasks[index];
-
-            return ExpansionTile(
-              leading: IconButton(
-                onPressed: () {
-                  task.status = task.status == TaskStatus.done
-                        ? TaskStatus.pending
-                        : TaskStatus.done;
-                  task.save();
-                },
-                icon: Icon(
-                  task.status == TaskStatus.done
-                      ? Icons.check_circle
-                      : Icons.circle_outlined,
-                  color: task.status == TaskStatus.done
-                      ? Colors.green
-                      : Colors.grey,
-                ),
-              ),
-              title: task.status == TaskStatus.done
-                  ? Text(
-                task.title,
-                style: const TextStyle(
-                  decoration: TextDecoration.lineThrough,
-                ),
-              )
-                  : Text(
-                task.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                task.dueDate != null
-                ? 'Due: ${task.dueDate?.day}-${task.dueDate?.month}-${task.dueDate?.year}'
-                    : ' ',
-              ),
-              trailing: Chip(
-                label: Text(
-                  task.priority.name.toUpperCase(),
-                  style: const TextStyle(color: Colors.black),
-                ),
-                backgroundColor:
-                task.priority == TaskPriority.high
-                    ? Colors.red[200]
-                    : Colors.blue[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 2,
-                shadowColor: Colors.grey,
-                side: BorderSide.none,
-              ),
-              childrenPadding: const EdgeInsets.fromLTRB(26, 12, 20, 12),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(task.description ?? 'No description'),
-                ),
-                Row(
-                  children: [
-                    Chip(
-                      label: Text(task.category?.name ?? 'No Category', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary,),),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      side: BorderSide.none,
-                    ),
-                    const Spacer(),
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => EditTaskScreen(task: task)),
-                        );
-                          
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit'),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        handleDelete(context: context, tasks: tasks, task: task);
-                      },
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.red[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            return TaskTile(
+              task: filteredTasks[index],
+              tasksBox: box,
+              index: index,
+              isExpanded: _expandedIndex == index,
+              onExpand: (expandedIndex) {
+                setState(() {
+                  _expandedIndex = expandedIndex == _expandedIndex ? null : expandedIndex;
+                });
+              },
             );
           },
         );
