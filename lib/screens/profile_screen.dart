@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:taskvector/provider/user_provider.dart';
+import 'package:taskvector/widgets/stats_card.dart';
 
-import '../models/user.dart';
-import '../provider/theme_provider.dart';
-import '../services/user_db.dart';
+import '../models/task.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onClose;
@@ -19,26 +19,50 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? _user;
+  Map<String, int> _stats = {
+    'total': 0,
+    'done': 0,
+    'overdue': 0,
+    'dueSoon': 0,
+  };
 
   @override
   void initState() {
     super.initState();
-    loadUser();
+    _calculateStats();
   }
 
-  Future<void> loadUser() async {
-    final user = await UserDb().getCurrentUser();
+  Future<void> _calculateStats() async {
+    final tasksBox = Hive.box<Task>('tasks');
+    final allTasks = tasksBox.values.toList();
+
+    final now = DateTime.now();
+    final dueSoon = now.add(const Duration(days: 2));
+
     setState(() {
-      _user = user;
+      _stats = {
+        'total': allTasks.length,
+        'done': allTasks.where((t) => t.status == TaskStatus.done).length,
+        'overdue': allTasks
+            .where((t) =>
+        t.dueDate != null &&
+            t.dueDate!.isBefore(now) &&
+            t.status != TaskStatus.done)
+            .length,
+        'dueSoon': allTasks
+            .where((t) =>
+        t.dueDate != null &&
+            t.dueDate!.isAfter(now) &&
+            t.dueDate!.isBefore(dueSoon) &&
+            t.status != TaskStatus.done)
+            .length,
+      };
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.themeMode == ThemeMode.dark;
+    final theme = Theme.of(context);
 
     return Stack(
       children: [
@@ -46,211 +70,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: widget.onClose,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(color: Colors.transparent),
+            child: Container(color: Colors.black26),
           ),
         ),
 
         GestureDetector(
           onVerticalDragUpdate: (details) {
-            if (details.delta.dy < 0) {
+            if (details.primaryDelta != null &&
+                details.primaryDelta! < -10) {
               widget.onClose();
             }
           },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 60),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(28),
               ),
+              child: Container(
+                width: double.infinity,
+                color: theme.colorScheme.primary,
+                child: SafeArea(
+                  bottom: false,
+                  child: Consumer<UserProvider>(
+                    builder: (context, userProvider, _) {
+                      if (userProvider.isLoading ||
+                          userProvider.user == null) {
+                        return const Padding(
+                          padding: EdgeInsets.all(40),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
 
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 36),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.keyboard_double_arrow_up,
-                        color: Colors.grey,
-                        size: 28,
-                      ),
-                      onPressed: widget.onClose,
-                    ),
+                      final user = userProvider.user!;
+
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: widget.onClose,
+                                icon: Icon(
+                                  Icons.keyboard_double_arrow_up,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  size: 30,
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              CircleAvatar(
+                                radius: 60,
+                                backgroundImage:
+                                user.profileImagePath != null
+                                    ? FileImage(
+                                    File(user.profileImagePath!))
+                                    : null,
+                                child: user.profileImagePath == null
+                                    ? const Icon(Icons.person, size: 60)
+                                    : null,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              Text(
+                                user.username,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color:
+                                  theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              const Text(
+                                'Momentum looks good on you.',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+
+                              const SizedBox(height: 32),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: StatsCard(
+                                      title: 'Total',
+                                      value: _stats['total']!,
+                                      icon: Icons.task_alt,
+                                      iconColor:
+                                      theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: StatsCard(
+                                      title: 'Done',
+                                      value: _stats['done']!,
+                                      icon: Icons.check_circle,
+                                      iconColor: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: StatsCard(
+                                      title: 'Overdue',
+                                      value: _stats['overdue']!,
+                                      icon: Icons.warning,
+                                      iconColor: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: StatsCard(
+                                      title: 'Due Soon',
+                                      value: _stats['dueSoon']!,
+                                      icon: Icons.schedule,
+                                      iconColor: Colors.orange,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundImage: _user!.profileImagePath != null
-                            ? FileImage(File(_user!.profileImagePath!))
-                            : null,
-                        child: _user!.profileImagePath == null
-                            ? Icon(Icons.person, size: 60)
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _user!.username,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'CS Student | FYP Warrior',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Stats row
-                      Row(
-                        children: [
-                          Expanded(child: _StatCard(
-                            title: 'Total',
-                            value: '127',
-                            icon: Icons.task_alt,
-                          )),
-                          const SizedBox(width: 16),
-                          Expanded(child: _StatCard(
-                            title: 'Done',
-                            value: '89',
-                            icon: Icons.check_circle,
-                          )),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(child: _StatCard(
-                            title: 'Overdue',
-                            value: '12',
-                            icon: Icons.warning,
-                          )),
-                          const SizedBox(width: 16),
-                          Expanded(child: _StatCard(
-                            title: 'Due Soon',
-                            value: '26',
-                            icon: Icons.schedule,
-                          )),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _StatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32, color: Colors.blue),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          Text(title, style: TextStyle(color: Colors.grey[600])),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileUpdateSection extends StatefulWidget {
-  const _ProfileUpdateSection();
-
-  @override
-  State<_ProfileUpdateSection> createState() => _ProfileUpdateSectionState();
-}
-
-class _ProfileUpdateSectionState extends State<_ProfileUpdateSection> {
-  File? _newImage;
-  final _usernameController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final userDb = UserDb();
-    final user = userDb.currentUser;
-    if (user != null) {
-      _usernameController.text = user.username;
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() => _newImage = File(pickedFile.path));
-    }
-  }
-
-  Future<void> _saveProfile() async {
-    final userDb = UserDb();
-    await userDb.updateUser(
-      username: _usernameController.text.trim(),
-      profileImagePath: _newImage?.path,
-    );
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated!')),
-      );
-      setState(() => _newImage = null);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: _pickImage,
-          child: CircleAvatar(
-            radius: 60,
-            backgroundImage: _newImage != null
-                ? FileImage(_newImage!)
-                : null,
-            child: _newImage == null
-                ? const Icon(Icons.camera_alt, size: 40)
-                : null,
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _usernameController,
-          decoration: InputDecoration(
-            labelText: 'Username',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _saveProfile,
-          child: const Text('Update Profile'),
         ),
       ],
     );

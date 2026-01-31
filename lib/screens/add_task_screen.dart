@@ -48,6 +48,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       id: const Uuid().v4(),
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
+      category: _category,
       dueDate: _dueDate,
       priority: _priority,
       status: _status,

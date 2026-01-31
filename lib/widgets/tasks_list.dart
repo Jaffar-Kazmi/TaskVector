@@ -144,6 +144,7 @@ class TasksList extends StatelessWidget {
         }
 
         return ListView.builder(
+          physics: const BouncingScrollPhysics(),
           itemCount: filteredTasks.length,
           itemBuilder: (context, index) {
             final task = filteredTasks[index];

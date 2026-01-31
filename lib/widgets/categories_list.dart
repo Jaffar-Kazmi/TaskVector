@@ -33,6 +33,7 @@ class _CategoriesListState extends State<CategoriesList> {
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.only(right: 12),
                 child: Row(
                   children: [

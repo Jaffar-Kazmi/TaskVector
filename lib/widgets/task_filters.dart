@@ -33,6 +33,7 @@ class _TaskFiltersState extends State<TaskFilters> {
     return Column(
       children: [
         SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
