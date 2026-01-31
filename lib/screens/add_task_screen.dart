@@ -86,7 +86,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   decoration: InputDecoration(
                     labelText: 'Title *',
                     prefixIcon: Icon(Icons.task),
-                    border: OutlineInputBorder(),
                     labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   validator: (value) => value == null || value.isEmpty ? 'Title is required' : null,

@@ -1,15 +1,39 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../models/user.dart';
 import '../provider/theme_provider.dart';
+import '../services/user_db.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final VoidCallback onClose;
 
   const ProfileScreen({super.key, required this.onClose});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    final user = await UserDb().getCurrentUser();
+    setState(() {
+      _user = user;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
     return Stack(
       children: [
         GestureDetector(
-          onTap: onClose,
+          onTap: widget.onClose,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(color: Colors.transparent),
@@ -29,7 +53,7 @@ class ProfileScreen extends StatelessWidget {
         GestureDetector(
           onVerticalDragUpdate: (details) {
             if (details.delta.dy < 0) {
-              onClose();
+              widget.onClose();
             }
           },
           child: Container(
@@ -42,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
 
             ),
             child: Column(
-              mainAxisSize: .min,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
                   padding: EdgeInsets.only(top: 36),
@@ -54,10 +78,7 @@ class ProfileScreen extends StatelessWidget {
                         color: Colors.grey,
                         size: 28,
                       ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                      ),
-                      onPressed: onClose,
+                      onPressed: widget.onClose,
                     ),
                   ),
                 ),
@@ -65,18 +86,20 @@ class ProfileScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // Profile content here
                       const SizedBox(height: 24),
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 60,
-                        backgroundImage: NetworkImage(
-                          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=512',
-                        ),
+                        backgroundImage: _user!.profileImagePath != null
+                            ? FileImage(File(_user!.profileImagePath!))
+                            : null,
+                        child: _user!.profileImagePath == null
+                            ? Icon(Icons.person, size: 60)
+                            : null,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Jaffar Raza',
-                        style: TextStyle(
+                      Text(
+                        _user!.username,
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
@@ -153,6 +176,83 @@ class ProfileScreen extends StatelessWidget {
           Text(title, style: TextStyle(color: Colors.grey[600])),
         ],
       ),
+    );
+  }
+}
+
+class _ProfileUpdateSection extends StatefulWidget {
+  const _ProfileUpdateSection();
+
+  @override
+  State<_ProfileUpdateSection> createState() => _ProfileUpdateSectionState();
+}
+
+class _ProfileUpdateSectionState extends State<_ProfileUpdateSection> {
+  File? _newImage;
+  final _usernameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final userDb = UserDb();
+    final user = userDb.currentUser;
+    if (user != null) {
+      _usernameController.text = user.username;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() => _newImage = File(pickedFile.path));
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    final userDb = UserDb();
+    await userDb.updateUser(
+      username: _usernameController.text.trim(),
+      profileImagePath: _newImage?.path,
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated!')),
+      );
+      setState(() => _newImage = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: _pickImage,
+          child: CircleAvatar(
+            radius: 60,
+            backgroundImage: _newImage != null
+                ? FileImage(_newImage!)
+                : null,
+            child: _newImage == null
+                ? const Icon(Icons.camera_alt, size: 40)
+                : null,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _usernameController,
+          decoration: InputDecoration(
+            labelText: 'Username',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _saveProfile,
+          child: const Text('Update Profile'),
+        ),
+      ],
     );
   }
 }
