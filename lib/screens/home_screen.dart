@@ -118,6 +118,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
                     ),
+                    title: _isSearching
+                        ? TextField(
+                      controller: searchController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Search tasks...',
+                        border: InputBorder.none,
+                      ),
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    )
+                    : null,
                     actions: [
                       Consumer<ThemeProvider>(
                         builder: (context, themeProvider, child) {

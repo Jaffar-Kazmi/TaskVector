@@ -108,11 +108,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   decoration: InputDecoration(
                     labelText: 'Username',
                     prefixIcon: const Icon(Icons.person),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   textCapitalization: TextCapitalization.words,
                 ),
